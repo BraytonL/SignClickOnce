@@ -74,16 +74,24 @@ if (!$PSBoundParameters.ContainsKey('publishPath')) {
 	Write-Error -Message "publishPath required" -RecommendedAction "include the correct path the publish output" -ErrorId "3"		
 	exit 3
 } 
+else
+{
+    #Write-Verbose "I'm going to try to convert the relative path: $PublishPath to an absolute path"
+    $PublishPath = Resolve-Path -Path $PublishPath
+    Write-Verbose "Publish Path: $PublishPath"
+}
 
 if (!(Test-Path $PublishPath)) {
     Write-Error -Message "Publish path, $($PublishPath), does not exist." -RecommendedAction "Verify the publish path is specified correctly"
 }
+
 
 # Application Files Path
 if (Test-Path "$PublishPath\Application Files")
 {
     Write-Verbose "Using '$PublishPath\Application Files' for Application Files Path"
     $AppFilesPath = "$PublishPath\Application Files"
+    Write-Verbose "AppFilesPath: $AppFilesPath"
 }
 else
 {
@@ -112,6 +120,9 @@ else
 $Cert = $null
 $SecurePassword = $null
 if ($PSBoundParameters.ContainsKey('PFXPath')) {
+
+    $PFXPath = Resolve-Path -Path $PFXPath
+
     if (Test-Path $PFXPath) {
 		$tempPem = "temp.pem"
 		$pass = "pass:$($PFXPassword)"	
@@ -156,6 +167,7 @@ if ($Cert -eq $null) {
 }
 
 # TimeStamping Server
+
 if(!$PSBoundParameters.ContainsKey('TimeStampingServer'))
 {
     $TimeStampingServer = Read-Host "TimeStamping Server URL"
@@ -181,7 +193,8 @@ if (Test-Path "$SignToolLocation\signtool.exe") {
 }
 
 if (!$PSBoundParameters.ContainsKey('MageLocation')) {    
-    $MageLocation = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools"
+    #$MageLocation = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools"
+    $MageLocation = Resolve -path $MageLocation
     Write-Verbose "MageLocation not specified, defaulting to $MageLocation"
 }
 
